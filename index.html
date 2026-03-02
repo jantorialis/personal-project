@@ -61,14 +61,18 @@
 
             #spin-container {
                 position: absolute;
-                bottom: 5%;
-                right: 5%;
-                width: 600px;
-                height: 600px;
-                max-width: 50vw;
-                max-height: 50vw;
+                bottom: 50%;
+                right: -5%;
+                transform: translateY(50%);
+                width: 900px;
+                height: 900px;
+                max-width: 80vw;
+                max-height: 80vw;
                 z-index: 30;
                 cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
 
             #spin-canvas {
@@ -140,8 +144,9 @@
             const scene = new THREE.Scene();
             scene.background = null;
 
-            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-            camera.position.z = 3
+            const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+            camera.position.z = 4
+            camera.position,x = -0.5
 
             const renderer = new THREE.WebGLRenderer({
                 canvas: canvas,
@@ -166,7 +171,7 @@
                         depthWrite: false
                     });
 
-                    const geometry = new THREE.PlaneGeometry(2.8, 4);
+                    const geometry = new THREE.PlaneGeometry(5.6, 8);
                     const plane = new THREE.Mesh(geometry, material);
 
                     scene.add(plane);
