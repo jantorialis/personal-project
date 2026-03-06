@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>lace's site · music</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <style>
+            .music-player {
+                background: rgba(0,0,128,0.03);
+                border: 2px double #000080;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .now-playing {
+                font-size: 16px;
+                color: #000080;
+                font-weight: bold;
+                margin-bottom: 10px;
+                text-align: center;
+                border-bottom: 1px dotted #000080;
+                padding-bottom: 8px;
+                text-transform: lowercase;
+            }
+
+            .song-title {
+                color: #000080;
+                font-weight: bold;
+            }
+
+            .artist-name {
+                color: #666;
+                font-size: 12px;
+            }
+
+            .playlist-item {
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                border-bottom: 1px dotted rgba(0,0,128,0.2);
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .playlist-item:hover {
+                background: rgba(0,0,128,0.05);
+                padding-left: 15px;
+            }
+
+            .playlist-item.playing {
+                background: rgba(0,0,128,0.1);
+                border-left: 3px solid #000080;
+            }
+
+            .play-button {
+                width: 30px;
+                height: 30px;
+                border: 2px double #000080;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 15px;
+                background: white;
+                color: #000080;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            .play-button:hover {
+                background: #000080;
+                color: white;
+            }
+
+            .song-info {
+                flex-grow: 1;
+            }
+
+            .song-info .song-title {
+                font-weight: bold;
+                color: #000080;
+            }
+
+            .song-info .song-artist {
+                font-size: 11px;
+                color: #666;
+            }
+
+            .controls {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                margin: 20px 0;
+            }
+
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                border: 2px double #000080;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: white;
+                color: #000080;
+                font-size: 18px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .control-btn:hover {
+                background: #000080;
+                color: white;
+                transform: scale(1.1);
+            }
+
+            .volume-slider {
+                width: 100px;
+                height: 4px;
+                background: rgba(0,0,128,0.1);
+                border: 1px dotted #000080;
+                position: relative;
+                margin: 0 10px;
+            }
+
+            .volume-fill {
+                height: 100%;
+                width: 70%;
+                background: #000080;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 6px;
+                background: rgba(0,0,128,0.1);
+                border: 1px dotted #000080;
+                margin: 15px 0;
+                cursor: pointer;
+                position: relative;
+            }
+
+            .progress-fill {
+                height: 100%;
+                width: 0%;
+                background: #000080;
+            }
+
+            .time-display {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: #000080;
+                margin-bottom: 5px;
+            }
+
+            .queue-indicator {
+                font-size: 10px;
+                color: rgba(0,0,128,0.5);
+                text-align: center;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <a href="/index.html" class="home-link">lace's site</a>
+            </div>
+            <div class="top-bar-right">
+                <a href="/main.html">home</a> · 
+                <a href="/about.html">about</a> · 
+                <a href="/portfolio.html">art</a> · 
+                <a href="/music.html" style="font-weight: bold;">music</a> · 
+                <a href="/journal.html">journal</a> · 
+                <a href="/sitemap.html">map</a> 
+            </div>
+        </div>
+
+        <div class="container" style="grid-template-columns: 220px 1fr 220px;">
+            <!-- left sidebar -->
+             <div class="left-col">
+                <div class="window-title">pinned</div>
+                <div class="window-content">
+                    <p style="margin-top: 5px; margin-bottom: 10px; font-size: 13px;"><span style="color: #000080; font-weight: bold;">since 2008</span></p>
+                    <p style="margin-top: 15px; font-size: 10px; color: rgba(0,0,128,0.5); text-align: right;">v.2.0.1</p>
+                </div>
+             </div>
+
+             <div class="window">
+                <div class="window-title">now playing</div>
+                <div class="window-content" id="nowPlayingWidget">
+                    <div class="quote-box" style="font-size: 12px; text-align: center;" id="currentSongDisplay">"weathergirl · flavor foley</div>
+                    <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px">
+                        <span class="status-label" id="playPauseIndicator">play</span>
+                        <span class="status-label" id="currentTimeDisplay">0:00</span>
+                        <span class="status-label" id="durationDisplay">-:--</span>
+                    </div>
+                </div>
+             </div>
+
+             <div class="window">
+                <div class="window-title">volume</div>
+                <div class="window-content">
+                    <div style="display: flex; align-items: center; gap: 10pxl">
+                        <span class="status-label">vol</span>
+                        <div class="volume-slider" id="volumeSlider">
+                            <div class="volume-fill" id="volumeFill" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+
+        <!-- main content -->
+         <div class="middle-col">
+            <div class="window">
+                <div class="window-title">music player</div>
+                <div class="window-content">
+                    <!-- audio -->
+                     <audio id="audioPlayer" preload="metadata"></audio>
+
+                    <!-- controls --> 
+                     <div class="music-player">
+                        <div class="now-playing" id="currentlyPlaying">weathergirl · flavor foley</div>
+
+                        <div class="time-display">
+                            <span id="currentTime">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                        </div>
+
+                        <!-- buttons -->
+                        <div class="controls">
+                            <div class="control-btn" id="prevBtn" title="previous">prev</div>
+                            <div class="control-btn" id="playPauseBtn" title="play">play</div>
+                            <div class="control-btn" id="nextBtn" title="next">next</div>
+                            <div class="control-btn" id="shuffleBtn" title="shuffle">shuf</div>
+                            <div class="control-btn" id="repeatBtn" title="repeat">loop</div>
+                        </div>
+
+                        <div class="queue-indicator" id="queueInfo">song 1 of 10 · weathergirl</div>
+                     </div>
+
+                     <h3 style="color: #000080; margin: 20px 0 15px;">playlist</h3>
+
+                     <!-- playlist -->
+                      <div id="playlist">
+                        <!-- flavor foley -->
+                        <div class="playlist-item" data-index="0" data-src="https://files.catbox.moe/nkjl26.mp3" data-title="weathergirl" data-artist="flavor foley">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">weathergirl</span>
+                                <div class="song-artist">flavor foley</div>
+                            </div>
+                        </div>
+                        
+                        <div class="playlist-item" data-index="1" data-src="https://files.catbox.moe/5ramsz.mp3" data-title="ego renegade boy" data-artist="flavor foley">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">ego renegade boy</span>
+                                <div class="song-artist">flavor foley</div>
+                            </div>
+                        </div>
+                        
+                        <div class="playlist-item" data-index="2" data-src="https://files.catbox.moe/bns95h.mp3" data-title="human" data-artist="flavor foley">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">human</span>
+                                <div class="song-artist">flavor foley</div>
+                            </div>
+                        </div>
+                        
+                        <div class="playlist-item" data-index="3" data-src="https://files.catbox.moe/871lzb.mp3" data-title="queen of venus" data-artist="flavor foley">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">queen of venus</span>
+                                <div class="song-artist">flavor foley</div>
+                            </div>
+                        </div>
+                        
+                        <!-- vane lily -->
+                        <div class="playlist-item" data-index="4" data-src="https://files.catbox.moe/0a96dr.mp3" data-title="love me" data-artist="vane lily">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">love me</span>
+                                <div class="song-artist">vane lily</div>
+                            </div>
+                        </div>
+                        
+                        <!-- ichi -->
+                        <div class="playlist-item" data-index="5" data-src="https://files.catbox.moe/ulezgb.mp3" data-title="4nim0sity [99.9999999999%]" data-artist="ichi">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">4nim0sity [99.9999999999%]</span>
+                                <div class="song-artist">ichi</div>
+                            </div>
+                        </div>
+                        
+                        <!-- ghost and pals -->
+                        <div class="playlist-item" data-index="6" data-src="https://files.catbox.moe/micadj.mp3" data-title="appetite of a people pleaser" data-artist="ghost and pals">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">appetite of a people pleaser</span>
+                                <div class="song-artist">ghost and pals</div>
+                            </div>
+                        </div>
+                        
+                        <!-- nomnomnami -->
+                        <div class="playlist-item" data-index="7" data-src="https://files.catbox.moe/6kbm9n.mp3" data-title="good intentions" data-artist="nomnomnami">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">good intentions</span>
+                                <div class="song-artist">nomnomnami</div>
+                            </div>
+                        </div>
+                        
+                        <!-- mili -->
+                        <div class="playlist-item" data-index="8" data-src="https://files.catbox.moe/dhmrj5.mp3" data-title="through patches of violet" data-artist="mili">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">through patches of violet</span>
+                                <div class="song-artist">mili</div>
+                            </div>
+                        </div>
+                        
+                        <div class="playlist-item" data-index="9" data-src="https://files.catbox.moe/ijx7dd.mp3" data-title="world execute me" data-artist="mili">
+                            <div class="play-button">▶</div>
+                            <div class="song-info">
+                                <span class="song-title">world execute me</span>
+                                <div class="song-artist">mili</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- right sidebar -->
+        <div class="right-col">
+            <div class="window">
+                <div class="window-title">genres</div>
+                <div class="window-content">
+                    <ul class="nav-list">
+                        <li>vocaloid</li>
+                        <li>jpop</li>
+                        <li>jrock</li>
+                        <li>electronic</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="window">
+                <div class="window-title">stats</div>
+                <div class="window-content">
+                    <div class="status-item">
+                        <span class="status-label">tracks:</span>
+                        <span class="status-value">10</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">artists:</span>
+                        <span class="status-value">6</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">playing:</span>
+                        <span class="status-value" id="playingStatus">stopped</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="/main.html">← back to home</a>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const repeatBtn = document.getElementById('repeatBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const currentTime = document.getElementById('currentTime');
+        const duration = document.getElementById('duration');
+        const playlistItems = document.querySelectorAll('.playlist-item');
+        const currentlyPlaying = document.getElementById('currentlyPlaying');
+        const currentSongDisplay = document.getElementById('currentSongDisplay');
+        const playPauseIndicator = document.getElementById('playPauseIndicator');
+        const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+        const durationDisplay = document.getElementById('durationDisplay');
+        const queueInfo = document.getElementById('queueInfo');
+        const playingStatus = document.getElementById('playingStatus');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeFill = document.getElementById('volumeFill');
+
+        let currentIndex = 0;
+        let isPlaying = false;
+        let shuffle = false;
+        let repeat = false;
+
+        // playlist data
+        const playlist = [
+            { title: 'weathergirl', artist: 'flavor foley', src: 'https://files.catbox.moe/nkjl26.mp3' },
+            { title: 'ego renegade boy', artist: 'flavor foley', src: 'https://files.catbox.moe/5ramsz.mp3' },
+            { title: 'human', artist: 'flavor foley', src: 'https://files.catbox.moe/bns95h.mp3' },
+            { title: 'queen of venus', artist: 'flavor foley', src: 'https://files.catbox.moe/871lzb.mp3' },
+            { title: 'love me', artist: 'vane lily', src: 'https://files.catbox.moe/0a96dr.mp3' },
+            { title: '4nim0sity [99.9999999999%]', artist: 'ichi', src: 'https://files.catbox.moe/ulezgb.mp3' },
+            { title: 'appetite of a people pleaser', artist: 'ghost and pals', src: 'https://files.catbox.moe/micadj.mp3' },
+            { title: 'good intentions', artist: 'nomnomnami', src: 'https://files.catbox.moe/6kbm9n.mp3' },
+            { title: 'through patches of violet', artist: 'mili', src: 'https://files.catbox.moe/dhmrj5.mp3' },
+            { title: 'world execute me', artist: 'mili', src: 'https://files.catbox.moe/ijx7dd.mp3' }
+        ];
+
+        function loadSong(index) {
+            const song = playlist[index];
+            audio.src = song.src;
+            currentlyPlaying.textContent = `${song.title} · ${song.artist}`;
+            currentSongDisplay.textContent = `"${song.title} · ${song.artist}"`;
+            queueInfo.textContent = `song ${index + 1} of ${playlist.length} · ${song.title}`;
+
+            playlistItems.forEach(item => item.classList.remove('playing'));
+            playlistItems[index]?.classList.add('playing');
+        }
+
+        function playSong() {
+            audio.play();
+            isPlaying = true;
+            playPauseBtn.textContent = 'pause';
+            playPauseIndicator.textContent = 'pause';
+            playingStatus.textContent = 'playing';
+        }
+
+        function pauseSong() {
+            audio.pause();
+            isPlaying = false;
+            playPauseBtn.textContent = 'play';
+            playPauseIndicator.textContent = 'play';
+            playingStatus.textContent = 'stopped';
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pauseSong();
+            } else {
+                playSong();
+            }
+        }
+
+        function nextSong() {
+            if (shuffle) {
+                let randomIndex;
+                do {
+                    randomIndex = Math.floor(Math.random() * playlist.length);
+                } while (randomIndex === currentIndex && playlist.length > 1);
+                currentIndex = randomIndex;
+            } else {
+                currentIndex = (currentIndex + 1) % playlist.length;
+            }
+            loadSong(currentIndex);
+            if (isPlaying) playSong();
+        }
+
+        function prevSong() {
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            loadSong(currentIndex);
+            if (isPlaying) playSong();
+        }
+
+        function updateProgress() {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = `${percent}%`;
+
+                currentTime.textContent = formatTime(audio.currentTime);
+                duration.textContent = formatTime(audio.duration);
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+                durationDisplay.textContent = formatTime(audio.duration);
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function setProgress(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        }
+
+        function setVolume(e) {
+            const width = volumeSlider.clientWidth;
+            const clickX = e.offsetX;
+            const vol = clickX / width;
+            audio.volume = Math.max(0, Math.min(1, vol));
+            volumeFill.style.width = `${vol * 100}%`;
+        }
+        
+        playPauseBtn.addEventListener('click', togglePlay);
+        prevBtn.addEventListener('click', prevSong);
+        nextBtn.addEventListener('click', nextSong);
+        
+        shuffleBtn.addEventListener('click', () => {
+            shuffle = !shuffle;
+            shuffleBtn.style.background = shuffle ? '#000080' : 'white';
+            shuffleBtn.style.color = shuffle ? 'white' : '#000080';
+        });
+        
+        repeatBtn.addEventListener('click', () => {
+            repeat = !repeat;
+            repeatBtn.style.background = repeat ? '#000080' : 'white';
+            repeatBtn.style.color = repeat ? 'white' : '#000080';
+        });
+
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('loadedmetadata', () => {
+            duration.textContent = formatTime(audio.duration);
+            durationDisplay.textContent = formatTime(audio.duration);
+        });
+        
+        audio.addEventListener('ended', () => {
+            if (repeat) {
+                playSong();
+            } else {
+                nextSong();
+            }
+        });
+
+        progressBar.addEventListener('click', setProgress);
+        volumeSlider.addEventListener('click', setVolume);
+
+        playlistItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                if (currentIndex === index) {
+                    togglePlay();
+                } else {
+                    currentIndex = index;
+                    loadSong(currentIndex);
+                    playSong();
+                }
+            });
+        });
+
+        loadSong(0);
+    </script>
+    </body>
+</html>
