@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lace's site · portfolio</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        .art-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            column-gap: 5px;
+            row-gap: 15px;
+            margin: 5px;
+        }
+        
+        .art-thumbnail {
+            border: 3px double #000080;
+            padding: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 0 rgba(0,0,128,0.1);
+            max-width: 200px
+        }
+        
+        .art-thumbnail:hover {
+            transform: scale(1.02);
+            box-shadow: 5px 5px 0 rgba(0,0,128,0.2);
+            border-color: #0000ff;
+        }
+        
+        .art-thumbnail img {
+            width: 100%;
+            height: auto;
+            display: block;
+            image-rendering: pixelated;
+        }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            border: 4px double #000080;
+            background: white;
+            padding: 10px;
+            box-shadow: 10px 10px 0 rgba(0,0,128,0.3);
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            display: block;
+            image-rendering: pixelated;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border: 3px double #000080;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: #000080;
+            z-index: 1001;
+        }
+        
+        .lightbox-close:hover {
+            background: #000080;
+            color: white;
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 3px double #000080;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: #000080;
+            transition: all 0.2s ease;
+        }
+        
+        .lightbox-nav:hover {
+            background: #000080;
+            color: white;
+        }
+        
+        .lightbox-nav.prev {
+            left: -25px;
+        }
+        
+        .lightbox-nav.next {
+            right: -25px;
+        }
+        
+        .lightbox-counter {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 3px double #000080;
+            padding: 5px 15px;
+            color: #000080;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        @media screen and (max-width: 600px) {
+            .art-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .lightbox-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+            
+            .lightbox-nav.prev {
+                left: 5px;
+            }
+            
+            .lightbox-nav.next {
+                right: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <a href="/index.html" class="home-link">lace's site</a>
+        </div>
+        <div class="top-bar-right">
+            <a href="/main.html">home</a> · 
+            <a href="/about.html">about</a> · 
+            <a href="/portfolio.html" style="font-weight: bold;">art</a> · 
+            <a href="/music.html">music</a> · 
+            <a href="/journal.html">journal</a> · 
+            <a href="/sitemap.html">map</a>
+        </div>
+    </div>
+
+    <div class="container" style="grid-template-columns: 200px 1fr 200px;">
+        <!-- left sidebar -->
+        <div class="left-col">
+            <div class="window">
+                <div class="window-title">pinned</div>
+                <div class="window-content">
+                    <p style="margin-top: 5px; margin-bottom: 10px; font-size: 13px;"><span style="color: #000080; font-weight: bold;">since 2008</span></p>
+                    <p style="font-size: 12px; line-height: 1.5;">stay safe! love you :3</p>
+                    <div style="margin-top: 15px; font-size: 10px; color: rgba(0,0,128,0.5); text-align: right;">v.2.0.1</div>
+                </div>
+             </div>
+
+            <div class="window">
+                <div class="window-title">categories</div>
+                <div class="window-content">
+                    <ul class="nav-list">
+                        <li><a href="#">digital</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="window">
+                <div class="window-title">info</div>
+                <div class="window-content">
+                    <p style="font-size: 11px;">click any piece to enlarge and scroll through</p>
+                    <p style="font-size: 11px; margin-top: 10px;">use arrows to navigate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- main -->
+        <div class="middle-col">
+            <div class="window">
+                <div class="window-title">✦ portfolio</div>
+                <div class="window-content">
+                    <h3 style="color: #000080; margin: 10px 0;">digital</h3>
+                    
+                    <div class="art-grid" id="artGrid">
+                        <div class="art-thumbnail" data-index="0">
+                            <img src="/assets/syn-keychain.png" alt="syn keychain">
+                        </div>
+                        <div class="art-thumbnail" data-index="1">
+                            <img src="/assets/syn-diva.png" alt="syn in a dress">
+                        </div>
+                        <div class="art-thumbnail" data-index="2">
+                            <img src="/assets/weathergirl-parrot.png" alt="parrot from unstable universe with a weathergirl theme">
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: right; font-size: 11px; margin-top: 10px;">click to enlarge</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- right sidebar -->
+        <div class="right-col">
+            <div class="window">
+                <div class="window-title">art info</div>
+                <div class="window-content">
+                    <div class="status-item">
+                        <span class="status-label">displayed:</span>
+                        <span class="status-label">3</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">updated:</span>
+                        <span class="status-label">sometimes</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">tools:</span>
+                        <span class="status-label">ibis paint x, iphone 13</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="window">
+                <div class="window-title">tags</div>
+                <div class="window-content">
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                        <span class="status-label">ocs</span>
+                        <span class="status-label">fanart</span>
+                        <span class="status-label">digital</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="/main.html">← back to home</a>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <span class="lightbox-close" id="closeLightbox">✕</span>
+            <div class="lightbox-nav prev" id="prevImage">←</div>
+            <div class="lightbox-nav next" id="nextImage">→</div>
+            <img id="lightboxImage" src="" alt="">
+            <div class="lightbox-counter" id="imageCounter">1 / 3</div>
+        </div>
+    </div>
+
+    <script>
+        const thumbnails = document.querySelectorAll('.art-thumbnail');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const closeLightbox = document.getElementById('closeLightbox');
+        const prevBtn = document.getElementById('prevImage');
+        const nextBtn = document.getElementById('nextImage');
+        const counter = document.getElementById('imageCounter');
+        
+        const images = [
+            '/assets/syn keychain.png',
+            '/assets/syn diva.png',
+            '/assets/weathergirl parrot.png',
+        ];
+        
+        let currentIndex = 0;
+        
+        thumbnails.forEach((thumb, index) => {
+            thumb.addEventListener('click', () => {
+                currentIndex = index;
+                updateLightboxImage();
+                lightbox.classList.add('active');
+            });
+        });
+        
+        closeLightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+        
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+            }
+        });
+        
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateLightboxImage();
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateLightboxImage();
+        });
+        
+        function updateLightboxImage() {
+            lightboxImage.src = images[currentIndex];
+            counter.textContent = `${currentIndex + 1} / ${images.length}`;
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            
+            if (e.key === 'ArrowLeft') {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateLightboxImage();
+            } else if (e.key === 'ArrowRight') {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateLightboxImage();
+            } else if (e.key === 'Escape') {
+                lightbox.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
